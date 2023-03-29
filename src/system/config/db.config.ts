@@ -1,4 +1,6 @@
-const DatabaseConfig = () => ({
+import { ConnectionOptions } from 'typeorm';
+
+const DatabaseConfig = (): ConnectionOptions => ({
   type: 'postgres',
   host: process.env.POSTGRES_HOST,
   port: parseInt(process.env.POSTGRES_PORT),
@@ -9,6 +11,7 @@ const DatabaseConfig = () => ({
     migrationsDir: 'src/system/migrations',
   },
   synchronize: false,
+  // @ts-ignore
   autoLoadEntities: true,
   entities: ['dist/**/entities/*.entity{.ts,.js}'],
   migrationsTableName: 'migrations',
