@@ -1,0 +1,45 @@
+version: "1"
+services:
+  postgres:
+    container_name: "postgres"
+    image: "postgres:14-alpine"
+    networks:
+      - user-service-network
+    volumes:
+      - "/etc/postgresql"
+      - "/var/log/postgresql"
+      - "/var/lib/postgresql"
+    environment:
+      POSTGRES_HOST: postgres-user-service
+      POSTGRES_PASSWORD: pass
+      POSTGRES_USER: user
+      POSTGRES_DB: db
+    ports:
+      - 1111:1111
+
+  user-service:
+    container_name: user-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - user-service-network
+    volumes:
+      - .:/home/node/app
+      - node_modules:/home/node/app/node_modules
+    environment:
+      NODE_OPTIONS: --max_old_space_size=4096
+      POSTGRES_HOST: postgres-user-service
+      POSTGRES_PORT: 1111
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: db
+    ports:
+      - "3001:3001"
+
+networks:
+  user-service-network:
+    external: true
+
+volumes:
+  node_modules:
