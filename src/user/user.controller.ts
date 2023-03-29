@@ -1,47 +1,41 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Param, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../system/guards/jwt-auth.guard';
 import { UserService } from './user.service';
 
 import { UpdateUserDto, ResponseUserDto } from './dto';
 import { GetUser } from './decorators/get-user.decorator';
+import { MessagePattern, Payload } from '@nestjs/microservices';
+import { Pattern } from './enums/pattern.enum';
 
 @Controller('user-service')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('users')
+  @MessagePattern(Pattern.GET_USERS)
   @UseGuards(JwtAuthGuard)
   findAll() {
     return this.userService.getAllUsers();
   }
 
-  @Get('users/me')
+  @MessagePattern(Pattern.GET_MY_USER)
   @UseGuards(JwtAuthGuard)
-  findMe(@GetUser() user) {
+  findMe(@Payload() user) {
     return this.userService.getMe(user);
   }
 
-  @Get('users/:id')
+  @MessagePattern(Pattern.GET_USER)
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) {
+  findOne(@Payload() id: string) {
     return this.userService.getUserById(+id);
   }
 
-  @Patch('users/:id')
+  @MessagePattern(Pattern.UPDATE_USER)
   @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() UpdateUserDto: UpdateUserDto) {
-    return this.userService.updateUserById(+id, UpdateUserDto);
+  update(@Payload() { id, user }: { id: string; user: UpdateUserDto }) {
+    return this.userService.updateUserById(+id, user);
   }
 
-  @Delete('users/:id')
+  @MessagePattern(Pattern.DELETE_USER)
   @UseGuards(JwtAuthGuard)
   delete(@Param('id') id: string) {
     return this.userService.deleteUserById(+id);
